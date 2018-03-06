@@ -79,51 +79,6 @@ class KukaGymEnv(gym.Env):
 
 
 
-  def _reset(self):
-    #print("KukaGymEnv _reset")
-    self.terminated = 0
-    p.resetSimulation()
-    p.setPhysicsEngineParameter(numSolverIterations=150)
-    p.setTimeStep(self._timeStep)
-    p.loadURDF(os.path.join(self._urdfRoot,"plane.urdf"),[0,0,-1])
-    
-    p.loadURDF(os.path.join(self._urdfRoot,"table/table.urdf"), 0.5000000,0.00000,-.820000,0.000000,0.000000,0.0,1.0)
-    
-    xpos = 0.55 +0.12*random.random()
-    ypos = 0 +0.2*random.random()
-    ang = 3.14*0.5+3.1415925438*random.random()
-    orn = p.getQuaternionFromEuler([0,0,ang])
-    self.blockUid =p.loadURDF(os.path.join(self._urdfRoot,"block.urdf"), xpos,ypos,-0.15,orn[0],orn[1],orn[2],orn[3])
-            
-    p.setGravity(0,0,-10)
-    self._kuka = kuka.Kuka(urdfRootPath=self._urdfRoot, timeStep=self._timeStep)
-    self._envStepCounter = 0
-    p.stepSimulation()
-    self._observation = self.getExtendedObservation()
-    return np.array(self._observation)
-
-  def __del__(self):
-    p.disconnect()
-############################
-  def _seed(self, seed=None):
-    self.np_random, seed = seeding.np_random(seed)
-    return [seed]
-##########################
-
-
-  def getExtendedObservation(self):
-     self._observation = self._kuka.getObservation()
-     gripperState  = p.getLinkState(self._kuka.kukaUid,self._kuka.kukaGripperIndex)
-     gripperPos = gripperState[0]
-     gripperOrn = gripperState[1]
-     blockPos,blockOrn = p.getBasePositionAndOrientation(self.blockUid)
-
-     invGripperPos,invGripperOrn = p.invertTransform(gripperPos,gripperOrn)
-     gripperMat = p.getMatrixFromQuaternion(gripperOrn)
-     dir0 = [gripperMat[0],gripperMat[3],gripperMat[6]]
-     dir1 = [gripperMat[1],gripperMat[4],gripperMat[7]]
-     dir2 = [gripperMat[2],gripperMat[5],gripperMat[8]]
-             
      gripperEul =  p.getEulerFromQuaternion(gripperOrn)
      #print("gripperEul")
      #print(gripperEul)
