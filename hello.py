@@ -108,35 +108,7 @@ class KukaGymEnv(gym.Env):
       da = [0,0,0,0,0,-0.05,0.05][action]
       f = 0.3
       realAction = [dx,dy,-0.002,da,f]
-    else:
-      #print("action[0]=", str(action[0]))
-      dv = 0.005
-      dx = action[0] * dv
-      dy = action[1] * dv
-      da = action[2] * 0.05
-      f = 0.3
-      realAction = [dx,dy,-0.002,da,f]
-    return self.step2( realAction)
-     
-  def step2(self, action):
-    for i in range(self._actionRepeat):
-      self._kuka.applyAction(action)
-      p.stepSimulation()
-      if self._termination():
-        break
-      self._envStepCounter += 1
-    if self._renders:
-      time.sleep(self._timeStep)
-    self._observation = self.getExtendedObservation()
-
-    #print("self._envStepCounter")
-    #print(self._envStepCounter)
     
-    done = self._termination()
-    npaction = np.array([action[3]]) #only penalize rotation until learning works well [action[0],action[1],action[3]])
-    actionCost = np.linalg.norm(npaction)*10.
-    #print("actionCost")
-    #print(actionCost)
     reward = self._reward()-actionCost
     #print("reward")
     #print(reward)
